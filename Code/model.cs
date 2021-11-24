@@ -1,6 +1,6 @@
 namespace model {
 	public class MapGenerator {
-		public Tile[,] GenerateMap(int boardX, int boardY) {
+		public Tile?[,] GenerateMap(int boardX, int boardY) {
 			var map = new Tile?[boardX, boardY];
 
 			// Loop through all board positions, generating a valid tile at each one
@@ -45,23 +45,8 @@ namespace model {
 					map[x, y] = generatedTile;
 				}
 			}
-			
-			var finalMap = new Tile[boardX, boardY];
 
-			// Convert map into a 2-dimensional array of non-nullable Tile objects, throwing an exception if nulls were left in the generated map
-			for (int x = 0; x < boardX; x++) {
-				for (int y = 0; y < boardY; y++) {
-					Tile? nullableTile = map[x, y];
-					if (nullableTile != null) {
-						finalMap[x, y] = (Tile)nullableTile;
-					}
-					else {
-						throw new Exception("FATAL: Generated game board contains null tile at (" + x + ", " + y + ")!");
-					}
-				}
-			}
-
-			return finalMap;
+			return map;
 		}
 	}
 	
