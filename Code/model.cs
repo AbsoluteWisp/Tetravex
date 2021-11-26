@@ -1,6 +1,22 @@
 namespace model {
-	public class MapGenerator {
-		public Tile?[,] GenerateMap(int boardX, int boardY) {
+	public class Board {
+		ui.Output output = new ui.Output();
+
+		int boardX, boardY; 
+		public Tile?[,] puzzleMap {get; private set;}
+		public Tile?[,] tileMap {get; private set;}
+
+		public Board(int cBoardX, int cBoardY) {
+			boardX = cBoardX;
+			boardY = cBoardY;
+
+			// The puzzle starts empty
+			puzzleMap = new Tile?[boardX, boardY];
+			// The tiles get generated and shuffled
+			tileMap = ShuffleMap(GenerateMap());
+		}
+
+		Tile?[,] GenerateMap() {
 			var map = new Tile?[boardX, boardY];
 
 			// Loop through all board positions, generating a valid tile at each one
@@ -47,6 +63,29 @@ namespace model {
 			}
 
 			return map;
+		}
+
+		Tile?[,] ShuffleMap(Tile?[,] mapToShuffle) {
+			Tile?[,] shuffledMap = new Tile?[boardX, boardY];
+			Random random = new Random();
+
+			for (int x = 0; x < boardX; x++) {
+				for (int y = 0; y < boardY; y++) {
+					bool goAgain = true;
+
+					while (goAgain) {
+						int randomX = random.Next(0, boardX);
+						int randomY = random.Next(0, boardY);
+
+						if (mapToShuffle[randomX, randomY] != null) {
+							shuffledMap[x, y] = mapToShuffle[randomX, randomY];
+							goAgain = false;						
+						}						
+					}
+				}
+			}
+
+			return shuffledMap;
 		}
 	}
 	
