@@ -1,58 +1,140 @@
-﻿public static class Program {
-	public static void Main(string[] args) {
-		const int boardX = 7;
-		const int boardY = 7;
+﻿namespace program {
+	public static class Program {
+		public static void Main(string[] args) {
+			// Configuration. TODO: Take from console input or args
+			const int boardX = 3;
+			const int boardY = 3;
 
-		// Instantiate the UI class
-		UI ui = new UI();
+			// Instantiate a UI output class
+			ui.Output output = new ui.Output();
+			Input input = new Input();
 
-		// Generate a solved board
-		model.MapGenerator tilegen = new model.MapGenerator();
-		model.Tile[,] boardMap = tilegen.GenerateMap(boardX, boardY);
+			// Create board
+			model.Board board = new model.Board(boardX, boardY);
 
-		// Prettyprint the board
-		ui.PrettyPrintBoard(boardMap, boardX, boardY);
-	}
-}
+			// Game loop
+			bool shouldClose = false;
+			Console.Clear();
+			output.PrintBoard(board);
+			
+			while (!shouldClose) {				
+				// Get meaningful input
+				string? userInput;
+				do {
+					Console.Write("Please input a command > ");
+					userInput = Console.ReadLine();
+				} while (String.IsNullOrWhiteSpace(userInput));
 
-public class UI {
-	public void PrettyPrintBoard(model.Tile[,] boardMap, int boardX, int boardY) {
-		// Repeat the top separation line for boardX times and add the missing end
-		for (int i = 0; i < boardX; i++) {
-			Console.Write("+-----");
+				Input.inputIntent intent = input.GetUserInputIntent(userInput);
+				if (intent == Input.inputIntent.move) {
+					input.HandleMove(userInput, board);
+					Console.Clear();
+					output.PrintBoard(board);
+				}
+				if (intent == Input.inputIntent.exit) {
+					shouldClose = true;
+				}
+				if (intent == Input.inputIntent.clear) {
+					Console.Clear();
+					output.PrintBoard(board);
+				}
+				if (intent == Input.inputIntent.board) {
+					output.PrintBoard(board);
+				}
+				if (intent == Input.inputIntent.solution) {
+					output.PrintMap(board.solvedMap);
+				}
+				if (intent == Input.inputIntent.help) {
+					Console.Clear();
+					output.PrintHelp();
+				}
+				if (intent == Input.inputIntent.none) {
+					Console.Write("Couldn't understand input.\n");
+				}
+
+				// Check for win
+				if (board.WinCheck()) {
+					Console.Write("Congratulations! You won! :D\n");
+					shouldClose = true;
+				}
+			}
+
+			Console.Write("Thank you for playing C# Terminal Tetravex!\n");
+			Environment.Exit(0);
 		}
-		Console.Write("+\n");
-		
-		for (int y = 0; y < boardY; y++) {
-			// Start of row
-			Console.Write("|");
-			// First line: top value of each tile in the row
-			for (int x = 0; x < boardX; x++) {
-				Console.Write("\\ " + boardMap[x, y].U + " /|");
-			}
-			Console.Write("\n");
-			
-			// Start of row
-			Console.Write("|");
-			// Second line: left and right values of each tile in the row
-			for (int x = 0; x < boardX; x++) {
-				Console.Write(boardMap[x, y].L + " X " + boardMap[x, y].R + "|");
-			}
-			Console.Write("\n");
+	}
 
-			// Start of row
-			Console.Write("|");
-			// Third line: down value of each tile in the row
-			for (int x = 0; x < boardX; x++) {
-				Console.Write("/ " + boardMap[x, y].D + " \\|");
+	public class Input {
+		public inputIntent GetUserInputIntent(string userInput) {
+			if (System.Text.RegularExpressions.Regex.Match(userInput, "^move [aAbB] [0-9]* [0-9]* [aAbB] [0-9]* [0-9]*").Success) {
+				return inputIntent.move;
 			}
-			Console.Write("\n");
+			if (userInput == "q" || userInput == "exit" || userInput == "quit") {
+				return inputIntent.exit;
+			}
+			if (userInput == "cls" || userInput == "clear") {
+				return inputIntent.clear;
+			}
+			if (userInput == "board" || userInput == "print") {
+				return inputIntent.board;
+			}
+			if (userInput == "solve" || userInput == "solution") {
+				return inputIntent.solution;
+			}
+			if (userInput == "help") {
+				return inputIntent.help;
+			}
+
+			return inputIntent.none;
+		}
+
+		public void HandleMove(string input, model.Board board) {
+			model.Tile?[,] sourceMap;
+			int sourceX;
+			int sourceY;
+
+			model.Tile?[,] targetMap;
+			int targetX;
+			int targetY;
+
+			string[] substrings = input.Split(" ");
 			
-			// Repeat the bottom separation line for boardX times and add the missing end
-			for (int i = 0; i < boardX; i++) {
-				Console.Write("+-----");
+			if (substrings[1] == "a" || substrings[1] == "A") {
+				sourceMap = board.tileMap;
 			}
-			Console.Write("+\n");
+			else {
+				sourceMap = board.puzzleMap;
+			}
+
+			int.TryParse(substrings[2], out sourceX);
+			int.TryParse(substrings[3], out sourceY);
+
+			if (substrings[4] == "b" || substrings[1] == "B") {
+				targetMap = board.puzzleMap;
+			}
+			else {
+				targetMap = board.tileMap;
+			}
+
+			int.TryParse(substrings[5], out targetX);
+			int.TryParse(substrings[6], out targetY);
+
+			try {
+				board.MoveTile(sourceMap, sourceX, sourceY, targetMap, targetX, targetY);
+			}
+			catch (Exception e) {
+				Console.Write(e.Message + "\n");
+			}
+		}
+
+		public enum inputIntent {
+			move,
+			exit,
+			clear,
+			board,
+			solution,
+			help,
+			none,
 		}
 	}
 }
