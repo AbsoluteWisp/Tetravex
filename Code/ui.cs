@@ -1,15 +1,16 @@
 namespace ui {
 	public class Output {
 		public void PrintBoard(model.Board board) {
-			Console.Clear();
-			Console.Write("Target map (map A)\n");
+			Console.Write("Your tiles (map A)\n");
+			PrintMap(board.tileMap);
+			Console.Write("\n");
+
+			Console.Write("Target map (map B)\n");
 			PrintMap(board.puzzleMap);
 			Console.Write("\n");
-			Console.Write("Your tiles (map B)\n");
-			PrintMap(board.tileMap);
 		}
 
-		void PrintMap(model.Tile?[,] map) {
+		public void PrintMap(model.Tile?[,] map) {
 			int boardX = map.GetLength(0);
 			int boardY = map.GetLength(1);
 
@@ -71,6 +72,20 @@ namespace ui {
 				}
 				Console.Write("+\n");
 			}
+		}
+
+		public void PrintHelp() {
+			Console.Write("\n");
+
+			Console.Write("C# Terminal Tetravex\n");
+			Console.Write("Help Page\n\n");
+			Console.Write("COMMAND           |DESCRIPTION            |SYNTAX                                                                       \n");
+			Console.Write("help              |Display this help page |help                                                                         \n");
+			Console.Write("board (print)     |Print the board maps   |board                                                                        \n");
+			Console.Write("move              |Move a tile            |move <sourceBoardID> <sourceX> <sourceY> <targetBoardID> <targetX> <targetY> \n");
+			Console.Write("clear (cls)       |Clear screen           |clear                                                                        \n");
+			Console.Write("solve (solution)  |Display a solution     |solve                                                                        \n");
+			Console.Write("quit (q, Q, exit) |Quit Tetravex          |quit                                                                         \n");
 		}
 	}
 }
